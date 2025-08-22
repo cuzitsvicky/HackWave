@@ -140,7 +140,7 @@ const Auth = () => {
           passwordInput.value = '';
           passwordInput.setAttribute('value', '');
         }
-      }, 2000); // Check every 2 seconds to reduce flickering
+      }, 1000); // Check every 1 second for faster response
       
       return () => clearInterval(interval);
     } else if (activeTab === 'signup') {
@@ -164,11 +164,50 @@ const Auth = () => {
           passwordInput.value = '';
           passwordInput.setAttribute('value', '');
         }
-      }, 2000); // Check every 2 seconds to reduce flickering
+      }, 1000); // Check every 1 second for faster response
       
       return () => clearInterval(interval);
     }
   }, [activeTab, loginData.email, loginData.password, signupData.name, signupData.email, signupData.password]);
+
+  // Additional aggressive anti-auto-fill that runs on every render
+  useEffect(() => {
+    if (activeTab === 'login') {
+      // Force clear any auto-filled values on every render
+      const emailInput = document.querySelector('input[name="user_email_input"]');
+      const passwordInput = document.querySelector('input[name="user_password_input"]');
+      
+      if (emailInput && emailInput.value && !loginData.email) {
+        emailInput.value = '';
+        emailInput.setAttribute('value', '');
+      }
+      
+      if (passwordInput && passwordInput.value && !loginData.password) {
+        passwordInput.value = '';
+        passwordInput.setAttribute('value', '');
+      }
+    } else if (activeTab === 'signup') {
+      // Force clear any auto-filled values on every render
+      const nameInput = document.querySelector('input[name="user_name_input"]');
+      const emailInput = document.querySelector('input[name="user_signup_email_input"]');
+      const passwordInput = document.querySelector('input[name="user_signup_password_input"]');
+      
+      if (nameInput && nameInput.value && !signupData.name) {
+        nameInput.value = '';
+        nameInput.setAttribute('value', '');
+      }
+      
+      if (emailInput && emailInput.value && !signupData.email) {
+        emailInput.value = '';
+        emailInput.setAttribute('value', '');
+      }
+      
+      if (passwordInput && passwordInput.value && !signupData.password) {
+        passwordInput.value = '';
+        passwordInput.setAttribute('value', '');
+      }
+    }
+  });
 
 
 
@@ -186,15 +225,33 @@ const Auth = () => {
 
     try {
       console.log("Attempting signup with:", signupData.email);
+      // Generate a valid user ID from the email (Appwrite requirement)
+      const userId = signupData.email.toLowerCase().replace(/[^a-z0-9]/g, '');
+      
       const response = await account.create(
-        signupData.name,
+        userId, // Use generated userId instead of name
         signupData.email,
         signupData.password,
-        signupData.name,
+        signupData.name, // Display name can contain special characters
       );
       console.log("Signup successful!", response);
       alert("SignUp successfully");
-      navigate("/home");
+      
+      // Force redirect using multiple methods
+      try {
+        // Primary: Use window.location for immediate redirect
+        window.location.href = "/home";
+        
+        // Backup: Use React Router navigate
+        setTimeout(() => {
+          navigate("/home", { replace: true });
+        }, 100);
+        
+      } catch (redirectError) {
+        console.log("All redirect methods failed:", redirectError);
+        // Final fallback: Force page reload to home
+        window.location.replace("/home");
+      }
     } catch (error) {
       console.log("Signup error:", error);
       setError(error.message || "Signup failed. Please try again.");
@@ -484,9 +541,11 @@ const Auth = () => {
                       value={signupData.name}
                       onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
-                      placeholder="Enter your full name"
+                      placeholder="Enter your full name "
                       disabled={loading}
                       required
+                      pattern="[A-Za-zÀ-ÿ\s\-'\.]+"
+                      title="Please enter a valid name with letters, spaces, hyphens, apostrophes, and periods"
                       autoComplete="off"
                       autoFill="off"
                       data-form-type="other"
@@ -594,6 +653,9 @@ const Auth = () => {
                 <input type="text" name="username" style={{ display: 'none' }} autoComplete="off" />
                 <input type="password" name="password" style={{ display: 'none' }} autoComplete="off" />
                 <input type="email" name="email" style={{ display: 'none' }} autoComplete="off" />
+                <input type="text" name="login" style={{ display: 'none' }} autoComplete="off" />
+                <input type="text" name="user" style={{ display: 'none' }} autoComplete="off" />
+                <input type="text" name="account" style={{ display: 'none' }} autoComplete="off" />
                 
                 <div className="group">
                   <label className="block text-sm font-semibold text-gray-700 mb-3 group-focus-within:text-blue-600 transition-colors duration-200">
@@ -605,6 +667,12 @@ const Auth = () => {
                       name="user_email_input"
                       value={loginData.email}
                       onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      onFocus={(e) => {
+                        if (e.target.value && !loginData.email) {
+                          e.target.value = '';
+                          setLoginData({ ...loginData, email: '' });
+                        }
+                      }}
                       className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                       placeholder="Enter your email"
                       disabled={loading}
@@ -636,8 +704,14 @@ const Auth = () => {
                         type="password"
                         name="user_password_input"
                         value={loginData.password}
-                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                        className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                                              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      onFocus={(e) => {
+                        if (e.target.value && !loginData.password) {
+                          e.target.value = '';
+                          setLoginData({ ...loginData, password: '' });
+                        }
+                      }}
+                      className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                         placeholder="Enter your password"
                         disabled={loading}
                         required
