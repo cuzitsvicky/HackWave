@@ -36,7 +36,7 @@ const Navbar = () => {
   return (
     <nav className="w-full px-6 py-3 flex justify-between items-center border-b-2 border-dashed border-black">
       <h1 className="text-2xl font-semibold">
-        <Link to="/home" className="no-underline text-black">Dev Seekho</Link>
+        <Link to="/analytics" className="no-underline text-black">Dev Seekho</Link>
       </h1>
 
       <div className="flex items-center gap-2">

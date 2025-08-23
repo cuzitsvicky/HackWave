@@ -23,8 +23,8 @@ const Auth = () => {
       try {
         const session = await account.get();
         console.log("User already logged in:", session);
-        // If user is logged in, redirect to home
-        navigate("/home");
+        // If user is logged in, redirect to analytics
+        navigate("/analytics");
       } catch (error) {
         console.log("No active session");
         // User is not logged in, stay on auth page
@@ -240,17 +240,17 @@ const Auth = () => {
       // Force redirect using multiple methods
       try {
         // Primary: Use window.location for immediate redirect
-        window.location.href = "/home";
+        window.location.href = "/analytics";
         
         // Backup: Use React Router navigate
         setTimeout(() => {
-          navigate("/home", { replace: true });
+          navigate("/analytics", { replace: true });
         }, 100);
         
       } catch (redirectError) {
         console.log("All redirect methods failed:", redirectError);
-        // Final fallback: Force page reload to home
-        window.location.replace("/home");
+        // Final fallback: Force page reload to analytics
+        window.location.replace("/analytics");
       }
     } catch (error) {
       console.log("Signup error:", error);
@@ -280,7 +280,7 @@ const Auth = () => {
         const currentSession = await account.get();
         console.log("User already logged in:", currentSession);
         // If we reach here, user is already logged in, so just navigate
-        navigate("/home");
+        navigate("/analytics");
         return;
       } catch (sessionError) {
         // User is not logged in, proceed with login
@@ -289,12 +289,12 @@ const Auth = () => {
       
       const session = await account.createEmailPasswordSession(loginData.email, loginData.password);
       console.log("Login successful!", session);
-      navigate("/home");
+      navigate("/analytics");
     } catch (error) {
       console.log("Login error:", error);
       if (error.message.includes("session is active")) {
-        setError("You are already logged in. Redirecting to home...");
-        setTimeout(() => navigate("/home"), 2000);
+        setError("You are already logged in. Redirecting to analytics...");
+        setTimeout(() => navigate("/analytics"), 2000);
       } else if (error.code === 401) {
         setError("Invalid email or password or Try with a verified email. Please try again.");
       } else if (error.code === 429) {
@@ -312,7 +312,7 @@ const Auth = () => {
     try {
       setGoogleLoading(true);
       setError("");
-      const successUrl = window.location.origin + "/home";
+      const successUrl = window.location.origin + "/analytics";
       const failureUrl = window.location.origin + "/";
       console.log(`Starting Google OAuth for ${type}...`);
       await account.createOAuth2Session('google', successUrl, failureUrl);

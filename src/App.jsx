@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
+import Analytics from './pages/Analytics'
 import Auth from './pages/Auth'
 
 import Account from './pages/Account'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
-
+import Faq from './pages/Faq'
 function App() {
   
 
@@ -20,9 +20,9 @@ function App() {
         <Route path='/' element={<Auth />} />
         <Route path='/auth' element={<Auth />} />
         
-        <Route path='/home' element={
+        <Route path='/analytics' element={
           <ProtectedRoute>
-            <Home />
+            <Analytics />
           </ProtectedRoute>
         } />
         <Route path='/account' element={
@@ -30,6 +30,7 @@ function App() {
             <Account />
           </ProtectedRoute>
         } />
+        <Route path='/faq' element={<Faq />} />
       </Routes>
     </BrowserRouter>
     </>
