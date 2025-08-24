@@ -1,4 +1,3 @@
-// Market Analysis API Service
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyAUnSI5NhvOFxiy4dI04ac1mnRdfsQbpBA';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
@@ -13,11 +12,11 @@ export const getMarketData = async (website) => {
       website: website,
       marketShare: Math.random() * 100,
       competitors: [
-        { name: 'Competitor A', share: Math.random() * 30 },
-        { name: 'Competitor B', share: Math.random() * 25 },
-        { name: 'Competitor C', share: Math.random() * 20 },
-        { name: 'Competitor D', share: Math.random() * 15 },
-        { name: 'Others', share: Math.random() * 10 }
+        { name: 'Amazon', share: 35.2 },
+        { name: 'eBay', share: 22.8 },
+        { name: 'Walmart', share: 18.5 },
+        { name: 'Target', share: 12.3 },
+        { name: 'Others', share: 11.2 }
       ],
       trafficData: {
         monthly: [
@@ -64,9 +63,16 @@ export const getMarketData = async (website) => {
 };
 
 // Gemini AI Analysis
-export const getGeminiAnalysis = async (website, marketData) => {
+export const getGeminiAnalysis = async (website, marketData, customPrompt = null) => {
   try {
-    const prompt = `Analyze the following market data for ${website} and provide insights:
+    let prompt;
+    
+    if (customPrompt) {
+      // Use the custom prompt provided for specific tab analysis
+      prompt = customPrompt;
+    } else {
+      // Default prompt for backward compatibility
+      prompt = `Analyze the following market data for ${website} and provide insights:
 
 Market Share: ${marketData.marketShare.toFixed(2)}%
 Traffic: ${marketData.trafficData.monthly[marketData.trafficData.monthly.length - 1].visitors.toLocaleString()} monthly visitors
@@ -81,6 +87,7 @@ Please provide:
 6. Risk factors
 
 Format the response in a structured way with clear sections.`;
+    }
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -104,27 +111,47 @@ Format the response in a structured way with clear sections.`;
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
     console.error('Error getting Gemini analysis:', error);
-    // Fallback to mock analysis if API fails
-    return `Market Analysis for ${website}:
-
-Market Position: ${website} holds a ${marketData.marketShare.toFixed(2)}% market share, positioning it as a ${marketData.marketShare > 50 ? 'market leader' : marketData.marketShare > 25 ? 'strong competitor' : 'emerging player'} in the industry.
-
-Key Strengths:
-- Strong monthly traffic of ${marketData.trafficData.monthly[marketData.trafficData.monthly.length - 1].visitors.toLocaleString()} visitors
+    
+    // Enhanced fallback analysis based on prompt type
+    if (customPrompt) {
+      // Try to provide relevant fallback based on prompt content
+      if (customPrompt.includes('strengths')) {
+        return `- Strong market presence with ${marketData.marketShare.toFixed(2)}% market share
+- Good traffic performance with ${marketData.trafficData.monthly[marketData.trafficData.monthly.length - 1].visitors.toLocaleString()} monthly visitors
+- Competitive SEO score of ${marketData.performance.seoScore.toFixed(0)}/100
+- Reasonable load time of ${marketData.performance.loadTime.toFixed(2)} seconds
+- Conversion rate of ${marketData.performance.conversionRate.toFixed(2)}% shows user engagement`;
+      } else if (customPrompt.includes('improvements')) {
+        return `- Bounce rate of ${marketData.performance.bounceRate.toFixed(1)}% could be optimized
+- Conversion rate of ${marketData.performance.conversionRate.toFixed(2)}% has room for growth
+- Load time could be improved from current ${marketData.performance.loadTime.toFixed(2)}s
+- SEO score of ${marketData.performance.seoScore.toFixed(0)}/100 could be enhanced
+- Market share of ${marketData.marketShare.toFixed(2)}% indicates growth potential`;
+      } else if (customPrompt.includes('recommendations')) {
+        return `- Implement A/B testing to improve conversion rates
+- Optimize user experience to reduce bounce rate
+- Focus on content marketing to increase organic traffic
+- Monitor competitor movements and adapt strategies
+- Invest in performance optimization for better load times`;
+      } else if (customPrompt.includes('risks')) {
+        return `- Market competition is intense with multiple players
+- Technology changes could impact performance metrics
+- Economic factors may affect user behavior and spending
+- Algorithm changes could affect SEO rankings
+- Regulatory changes in data privacy laws`;
+      }
+    }
+    
+    // Default fallback - remove introductory text
+    return `- Strong monthly traffic of ${marketData.trafficData.monthly[marketData.trafficData.monthly.length - 1].visitors.toLocaleString()} visitors
 - Good SEO performance with a score of ${marketData.performance.seoScore.toFixed(0)}/100
 - Competitive load time of ${marketData.performance.loadTime.toFixed(2)} seconds
-
-Areas for Improvement:
 - Bounce rate of ${marketData.performance.bounceRate.toFixed(1)}% could be optimized
 - Conversion rate of ${marketData.performance.conversionRate.toFixed(2)}% has room for growth
-
-Strategic Recommendations:
-1. Implement A/B testing to improve conversion rates
-2. Optimize user experience to reduce bounce rate
-3. Focus on content marketing to increase organic traffic
-4. Monitor competitor movements and adapt strategies accordingly
-
-Risk Factors:
+- Implement A/B testing to improve conversion rates
+- Optimize user experience to reduce bounce rate
+- Focus on content marketing to increase organic traffic
+- Monitor competitor movements and adapt strategies
 - Market competition is intense with multiple players
 - Technology changes could impact performance metrics
 - Economic factors may affect user behavior and spending`;

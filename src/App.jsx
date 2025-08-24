@@ -9,6 +9,12 @@ import Account from './pages/Account'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import Faq from './pages/Faq'
+import ContactUs from './pages/contactus'
+import Chatbot from './pages/chatbot'
+import SettingsPage from './pages/SettingsPage'
+import StartupOrNotPage from './pages/StartupOrNotPage'
+
+
 function App() {
   
 
@@ -31,6 +37,10 @@ function App() {
           </ProtectedRoute>
         } />
         <Route path='/faq' element={<Faq />} />
+        <Route path='/contactus' element={<ContactUs />} />
+        <Route path='/chatbot' element={<Chatbot />} />
+        <Route path='/settings' element={<SettingsPage />} /> 
+        <Route path='/startupornot' element={<StartupOrNotPage />} /> 
       </Routes>
     </BrowserRouter>
     </>

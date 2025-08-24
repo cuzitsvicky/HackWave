@@ -33,34 +33,75 @@ export const MarketSharePieChart = ({ competitors }) => {
       {
         data: competitors.map(comp => comp.share),
         backgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56',
-          '#4BC0C0',
-          '#9966FF',
-          '#FF9F40'
+          '#3B82F6', // Blue-500
+          '#1D4ED8', // Blue-700
+          '#60A5FA', // Blue-400
+          '#2563EB', // Blue-600
+          '#93C5FD', // Blue-300
+          '#1E40AF'  // Blue-800
         ],
         borderWidth: 2,
-        borderColor: '#fff'
+        borderColor: '#ffffff',
+        hoverBorderWidth: 3,
+        hoverBorderColor: '#1e40af'
       }
     ]
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'bottom',
-      },
-      title: {
-        display: true,
-        text: 'Market Share Distribution',
-        font: { size: 16, weight: 'bold' }
+        labels: {
+          padding: 20,
+          usePointStyle: true,
+          font: {
+            size: 14,
+            weight: '600',
+            family: 'Inter, system-ui, sans-serif'
+          },
+          generateLabels: function(chart) {
+            const data = chart.data;
+            if (data.labels.length && data.datasets.length) {
+              return data.labels.map((label, i) => {
+                const dataset = data.datasets[0];
+                const value = dataset.data[i];
+                const total = dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                
+                return {
+                  text: `${label} (${percentage}%)`,
+                  fillStyle: dataset.backgroundColor[i],
+                  strokeStyle: dataset.backgroundColor[i],
+                  lineWidth: 0,
+                  pointStyle: 'circle',
+                  hidden: false,
+                  index: i
+                };
+              });
+            }
+            return [];
+          }
+        }
       },
       tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#3B82F6',
+        borderWidth: 2,
+        cornerRadius: 8,
+        padding: 12,
         callbacks: {
+          title: function(context) {
+            return `Competitor: ${context[0].label}`;
+          },
           label: function(context) {
-            return `${context.label}: ${context.parsed.toFixed(2)}%`;
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = ((context.parsed / total) * 100).toFixed(1);
+            return `Market Share: ${percentage}% (${context.parsed.toFixed(2)})`;
           }
         }
       }
@@ -68,7 +109,7 @@ export const MarketSharePieChart = ({ competitors }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="h-80">
       <Pie data={data} options={options} />
     </div>
   );
@@ -89,24 +130,29 @@ export const TrafficLineChart = ({ monthlyData }) => {
         tension: 0.4,
         pointBackgroundColor: '#3B82F6',
         pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 6
+        pointBorderWidth: 3,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        pointHoverBackgroundColor: '#1D4ED8',
+        pointHoverBorderColor: '#fff'
       }
     ]
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false
       },
-      title: {
-        display: true,
-        text: 'Monthly Traffic Trends',
-        font: { size: 16, weight: 'bold' }
-      },
       tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+        cornerRadius: 8,
         callbacks: {
           label: function(context) {
             return `Visitors: ${context.parsed.y.toLocaleString()}`;
@@ -115,19 +161,46 @@ export const TrafficLineChart = ({ monthlyData }) => {
       }
     },
     scales: {
+      x: {
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false
+        },
+        ticks: {
+          font: {
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          color: '#6B7280'
+        }
+      },
       y: {
         beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false
+        },
         ticks: {
+          font: {
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          color: '#6B7280',
           callback: function(value) {
             return value.toLocaleString();
           }
         }
       }
+    },
+    elements: {
+      point: {
+        hoverRadius: 8
+      }
     }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="h-96">
       <Line data={data} options={options} />
     </div>
   );
@@ -141,11 +214,12 @@ export const DemographicsBarChart = ({ ageGroups, locations }) => {
       {
         label: 'Age Distribution (%)',
         data: ageGroups.map(item => item.percentage),
-        backgroundColor: 'rgba(147, 51, 234, 0.8)',
-        borderColor: '#9333EA',
-        borderWidth: 2,
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderColor: '#3B82F6',
+        borderWidth: 0,
         borderRadius: 8,
-        borderSkipped: false
+        borderSkipped: false,
+        hoverBackgroundColor: 'rgba(29, 78, 216, 0.9)'
       }
     ]
   };
@@ -156,22 +230,30 @@ export const DemographicsBarChart = ({ ageGroups, locations }) => {
       {
         label: 'Geographic Distribution (%)',
         data: locations.map(item => item.percentage),
-        backgroundColor: 'rgba(34, 197, 94, 0.8)',
-        borderColor: '#22C55E',
-        borderWidth: 2,
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderColor: '#3B82F6',
+        borderWidth: 0,
         borderRadius: 8,
-        borderSkipped: false
+        borderSkipped: false,
+        hoverBackgroundColor: 'rgba(29, 78, 216, 0.9)'
       }
     ]
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false
       },
       tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+        cornerRadius: 8,
         callbacks: {
           label: function(context) {
             return `${context.label}: ${context.parsed.y.toFixed(1)}%`;
@@ -180,10 +262,32 @@ export const DemographicsBarChart = ({ ageGroups, locations }) => {
       }
     },
     scales: {
+      x: {
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false
+        },
+        ticks: {
+          font: {
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          color: '#6B7280'
+        }
+      },
       y: {
         beginAtZero: true,
         max: 100,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false
+        },
         ticks: {
+          font: {
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          color: '#6B7280',
           callback: function(value) {
             return value + '%';
           }
@@ -194,13 +298,17 @@ export const DemographicsBarChart = ({ ageGroups, locations }) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Age Distribution</h3>
-        <Bar data={ageData} options={options} />
+        <div className="h-80">
+          <Bar data={ageData} options={options} />
+        </div>
       </div>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Geographic Distribution</h3>
-        <Bar data={locationData} options={options} />
+        <div className="h-80">
+          <Bar data={locationData} options={options} />
+        </div>
       </div>
     </div>
   );
@@ -220,36 +328,44 @@ export const PerformanceMetricsChart = ({ performance }) => {
           performance.seoScore
         ],
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(239, 68, 68, 0.8)',
-          'rgba(34, 197, 94, 0.8)',
-          'rgba(245, 158, 11, 0.8)'
+          'rgba(59, 130, 246, 0.8)',   // Blue-500
+          'rgba(59, 130, 246, 0.8)',   // Blue-500
+          'rgba(59, 130, 246, 0.8)',   // Blue-500
+          'rgba(59, 130, 246, 0.8)'    // Blue-500
         ],
         borderColor: [
           '#3B82F6',
-          '#EF4444',
-          '#22C55E',
-          '#F59E0B'
+          '#3B82F6',
+          '#3B82F6',
+          '#3B82F6'
         ],
-        borderWidth: 2,
+        borderWidth: 0,
         borderRadius: 8,
-        borderSkipped: false
+        borderSkipped: false,
+        hoverBackgroundColor: [
+          'rgba(29, 78, 216, 0.9)',    // Blue-700
+          'rgba(29, 78, 216, 0.9)',    // Blue-700
+          'rgba(29, 78, 216, 0.9)',    // Blue-700
+          'rgba(29, 78, 216, 0.9)'     // Blue-700
+        ]
       }
     ]
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false
       },
-      title: {
-        display: true,
-        text: 'Performance Metrics',
-        font: { size: 16, weight: 'bold' }
-      },
       tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+        cornerRadius: 8,
         callbacks: {
           label: function(context) {
             const labels = ['Load Time', 'Bounce Rate', 'Conversion Rate', 'SEO Score'];
@@ -260,14 +376,38 @@ export const PerformanceMetricsChart = ({ performance }) => {
       }
     },
     scales: {
+      x: {
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false
+        },
+        ticks: {
+          font: {
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          color: '#6B7280'
+        }
+      },
       y: {
-        beginAtZero: true
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false
+        },
+        ticks: {
+          font: {
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          color: '#6B7280'
+        }
       }
     }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="h-96">
       <Bar data={data} options={options} />
     </div>
   );
@@ -281,31 +421,36 @@ export const DailyTrafficChart = ({ dailyData }) => {
       {
         label: 'Daily Visitors',
         data: dailyData.map(item => item.visitors),
-        borderColor: '#10B981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderColor: '#3B82F6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderWidth: 2,
-        fill: false,
+        fill: true,
         tension: 0.3,
-        pointBackgroundColor: '#10B981',
+        pointBackgroundColor: '#3B82F6',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
-        pointRadius: 4
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#1D4ED8',
+        pointHoverBorderColor: '#fff'
       }
     ]
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false
       },
-      title: {
-        display: true,
-        text: 'Daily Traffic Pattern (Last 30 Days)',
-        font: { size: 16, weight: 'bold' }
-      },
       tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+        cornerRadius: 8,
         callbacks: {
           label: function(context) {
             return `Visitors: ${context.parsed.y.toLocaleString()}`;
@@ -314,9 +459,31 @@ export const DailyTrafficChart = ({ dailyData }) => {
       }
     },
     scales: {
+      x: {
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false
+        },
+        ticks: {
+          font: {
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          color: '#6B7280'
+        }
+      },
       y: {
         beginAtZero: true,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)',
+          drawBorder: false
+        },
         ticks: {
+          font: {
+            size: 12,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          color: '#6B7280',
           callback: function(value) {
             return value.toLocaleString();
           }
@@ -326,8 +493,11 @@ export const DailyTrafficChart = ({ dailyData }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-      <Line data={data} options={options} />
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Daily Traffic Pattern (Last 30 Days)</h3>
+      <div className="h-80">
+        <Line data={data} options={options} />
+      </div>
     </div>
   );
 };
